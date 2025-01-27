@@ -1,0 +1,131 @@
+syntax = "proto3";
+
+package mobile.login.v1;
+
+import "protobuf_validation.proto";
+import "common_model.proto";
+
+service MobileLogin {
+
+  rpc Login(LoginRequest) returns (LoginResponse) {}
+
+}
+
+message LoginRequest {
+
+  // User related
+  // Mandatory, server validation
+  oneof CredentialsType {
+    UsernameCredentials username_creds = 1;
+  }
+
+  // A Kik device ID, a client generated a device prefix (CAN,CIP,etc) + UUID.
+  // Device IDs should be generated on install and persist across the user resetting their account.
+  common.XiDeviceId device_id = 3 [(kik.validation.field_validation) = {
+    mandatory: true
+  }];
+  common.XiLocale locale = 4 [(kik.validation.field_validation) = {
+    mandatory: true
+  }];
+  common.XiClientVersion version = 5 [(kik.validation.field_validation) = {
+    mandatory: true
+  }];
+
+  // Misc device info
+  // Mandatory, server validation
+  oneof MiscDeviceInfo {
+    AndroidInfo android_info = 6;
+  }
+
+  // Verifications
+  string recaptcha_token = 9 [(kik.validation.field_validation) = {
+    mandatory: true
+  }];
+}
+
+message LoginResponse {
+  Result result = 1;
+
+  // Available on OK result.
+  string session_token = 2;
+
+  // Available on INVALID/ERROR on debug.
+  string reason = 3;
+
+  map<string, string> xdata_records = 4;
+
+  map<string, string> ab_tests = 5;
+
+  string jid = 6;
+
+  string username = 7;
+
+  string email = 8;
+
+  string message = 9;
+
+  string access_token = 10;
+
+  repeated Action actions = 11;
+}
+
+message UsernameCredentials {
+  string username = 1 [(kik.validation.field_validation) = {
+    mandatory: false
+    min_byte_length: 1
+    max_byte_length: 255
+  }];
+  string username_derived_passkey = 2 [(kik.validation.field_validation) = {
+    min_byte_length: 32
+    max_byte_length: 32
+    mandatory: true
+  }];
+}
+
+message AndroidInfo {
+  string brand = 1;
+  // Mobile country code see:https://en.wikipedia.org/wiki/Mobile_country_code
+  string operator = 2;
+  string android_sdk = 3;
+  string android_id = 4 [(kik.validation.field_validation) = {
+    mandatory: false
+    min_byte_length: 16
+    max_byte_length: 16
+  }];
+  string logins_since_install = 5;
+  string registration_since_install = 6;
+  string install_date = 7;
+  string install_referrer = 8;
+  string os_version = 9;
+}
+
+enum Result {
+  OK = 0;
+  SERVER_ERROR = 1;
+  INVALID = 2; //Missing mandatory device info, rate limiting...
+  SERVICE_UNAVAILABLE = 3;
+  NAME_REJECTED = 4; //First name / Last name
+  USERNAME_REJECTED = 5;
+  EMAIL_REJECTED = 6;
+  BIRTHDAY_REJECTED = 7;
+  ALREADY_REGISTERED = 8;
+  USERNAME_EXISTS = 9;
+  VERIFICATION_FAILED = 10;
+  NOT_REGISTERED = 11;
+  INVALID_PASSWORD = 12;
+  ACCT_TERMINATED = 13;
+  MISSING_CREDS = 14;
+  EXPIRED_SSO_TOKEN = 15;
+  USER_TEMP_BANNED = 16;
+}
+
+message Action {
+  string id = 1;
+  bool required = 2;
+  repeated ActionParams params = 3;
+}
+
+message ActionParams {
+  string key = 1;
+  string value = 2;
+}

@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package mobile.login.jwt.v1;
+
+import "protobuf_validation.proto";
+import "common_model.proto";
+import "login/v1/mobile_login_service.proto";
+
+service MobileLoginJwt {
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {}
+}
+
+message RefreshTokenRequest {
+
+  // Mandatory, server validation
+  oneof CredentialsType {
+    mobile.login.v1.UsernameCredentials username_creds = 1;
+  }
+
+  common.XiDeviceId device_id = 2 [(kik.validation.field_validation) = {
+    mandatory: true
+  }];
+
+  common.XiLocale locale = 3 [(kik.validation.field_validation) = {
+    mandatory: true
+  }];
+
+  common.XiClientVersion version = 4 [(kik.validation.field_validation) = {
+    mandatory: true
+  }];
+
+  // Misc device info
+  // Mandatory, server validation
+  oneof MiscDeviceInfo {
+    mobile.login.v1.AndroidInfo android_info = 5;
+  }
+
+  string recaptcha_token = 8 [(kik.validation.field_validation) = {
+    mandatory: false
+  }];
+
+  string refresh_token = 12 [(kik.validation.field_validation) = {
+    mandatory: false
+    min_byte_length: 1
+    max_byte_length: 15000 // sanity bound
+  }];
+}
+
+message RefreshTokenResponse {
+  Result result = 1;
+
+  // Available on OK result.
+  string refresh_token = 2;
+  string access_token = 3;
+
+  // Available on INVALID/ERROR on debug
+  string reason = 4;
+
+  string message = 5;
+}
+
+enum Result {
+  OK = 0;
+  SERVER_ERROR = 1;
+  CLIENT_ERROR = 2;
+  SERVICE_UNAVAILABLE = 3;
+  TOKEN_ERROR = 4;
+  VERIFY = 5;
+  VERIFICATION_FAILED = 6;
+}
