@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package mobile.profilepic.v1;
+
+import "protobuf_validation.proto";
+import "common_model.proto";
+
+service MobileProfilepicUpload {
+
+    rpc Upload(UploadRequest) returns (UploadResponse) {}
+
+}
+
+message UploadRequest {
+
+    common.XiBareUserJid user_jid = 1 [(kik.validation.field_validation) = {
+        mandatory: true
+    }];
+
+    oneof CredentialsType {
+        common.UsernameCredentials username_creds = 2;
+    }
+
+    common.XiDeviceId device_id = 3 [(kik.validation.field_validation) = {
+        mandatory: true
+    }];
+    common.XiLocale locale = 4 [(kik.validation.field_validation) = {
+        mandatory: true
+    }];
+    common.XiClientVersion version = 5 [(kik.validation.field_validation) = {
+        mandatory: true
+    }];
+    common.VerificationTokens tokens = 6 [(kik.validation.field_validation) = {
+        mandatory: true
+    }];
+
+    string blockhash_scaled = 7 [(kik.validation.field_validation) = {
+        mandatory: true
+    }];
+    string sha1_scaled = 8 [(kik.validation.field_validation) = {
+        mandatory: true
+    }];
+    string sha1_original = 9 [(kik.validation.field_validation) = {
+        mandatory: true
+    }];
+
+    bytes file_content = 10 [(kik.validation.field_validation) = {
+        mandatory: true
+        min_byte_length: 1
+        max_byte_length: 2500000
+    }];
+    ExtensionType extension_type = 11;
+    common.XiGroupJid group_jid = 12;
+    bool silent = 13;
+    string hardware_id = 14 [(kik.validation.field_validation) = {
+        mandatory: true
+    }];
+}
+
+message UploadResponse {
+    Result result = 1;
+
+    string reason = 2;
+}
+
+enum ExtensionType {
+    PRIMARY = 0;
+    ORIGINAL = 1;
+    BACKGROUND = 2;
+}
+
+enum Result {
+    OK = 0;
+    SERVER_ERROR = 1;
+    INVALID = 2;
+    SERVICE_UNAVAILABLE = 3;
+    REQUEST_ENTITY_TOO_LARGE = 4;
+    UNAUTHORIZED = 5;
+    VERIFICATION_FAILED = 6;
+    EXPIRED_TOKEN = 7;
+    VERIFY_TOKEN = 8;
+}

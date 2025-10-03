@@ -102,9 +102,9 @@ message AndroidInfo {
 enum Result {
   OK = 0;
   SERVER_ERROR = 1;
-  INVALID = 2; //Missing mandatory device info, rate limiting...
+  INVALID = 2;
   SERVICE_UNAVAILABLE = 3;
-  NAME_REJECTED = 4; //First name / Last name
+  NAME_REJECTED = 4;
   USERNAME_REJECTED = 5;
   EMAIL_REJECTED = 6;
   BIRTHDAY_REJECTED = 7;
