@@ -33,10 +33,43 @@ message XiClientVersion {
 
 message XiLocale {
   string locale = 1 [(kik.validation.field_validation) = {
-    // Follows toString() of java.util.Locale with only language and region set
-    // Can be parsed using com.kik.i18n.LangUtils.parseLocale
+    // Follows toString() of java.util.Locale with only language and region
     // Example patterns: en, en_CA, en_029
-    // This has been relaxed to allow es_41, which is being sent by some versions of
-    // android
-    regex: "^(?i)[a-z]{2,8}(?:_([a-z]{2}|[0-9]{2,3}))?$"}];
+    mandatory: true;
+  }];
+}
+
+message XiBareUserJid {
+    string local_part = 1;
+}
+
+message XiGroupJid {
+    string local_part = 1 [(kik.validation.field_validation) = {
+        mandatory: true;
+    }];
+}
+
+message VerificationTokens {
+    string integrity_token = 1 [(kik.validation.field_validation) = {
+        mandatory: false
+    }];
+    string recaptcha_token = 2 [(kik.validation.field_validation) = {
+        mandatory: false
+    }];
+    string access_token = 4 [(kik.validation.field_validation) = {
+        mandatory: false
+    }];
+}
+
+message UsernameCredentials {
+    string username = 1 [(kik.validation.field_validation) = {
+        mandatory: false
+        min_byte_length: 1
+        max_byte_length: 255
+    }];
+    string username_derived_passkey = 2 [(kik.validation.field_validation) = {
+        min_byte_length: 32
+        max_byte_length: 32
+        mandatory: true
+    }];
 }
